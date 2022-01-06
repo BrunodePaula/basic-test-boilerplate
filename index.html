@@ -1,17 +1,134 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-  <head>
-    <title>Front End Test - Greenthumb</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./index.scss" />
-  </head>
 
-  <body>
-    <img src="images/icons/logo-white.svg" alt="Greenthumb" />
-  </body>
+<head>
+  <title>Front End Test - Greenthumb</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./index.scss" />
+</head>
+
+<body>
+  <section class="section-top">
+    <img src="images/hero/desktop/left-leaves.png" alt="">
+    <img src="images/hero/desktop/plantperson.png" alt="">
+    <img src="images/hero/desktop/right-leaves.png" alt="">
+  </section>
+  <section class="section-midle">
+    <div class="box-select">
+      <img src="images/illustrations/sun.png" alt="">
+      <p>1. Set the amount of <b>sunlight</b> your plant will get.</p>
+      <select name="sunlight" id="sunlight" onChange="update()">
+        <option value="">select</option>
+        <option value="no">no</option>
+        <option value="low">low</option>
+        <option value="high">high</option>
+      </select>
+    </div>
+    <div class="box-select">
+      <img src="images/illustrations/wateringcan.png" alt="">
+      <p>2. How often do you want to <b>water</b> your plant?</p>
+      <select name="water" id="water" onChange="update()">
+        <option value="">select</option>
+        <option value="regularly">regularly</option>
+        <option value="daily">daily</option>
+        <option value="rarely">rarely</option>
+      </select>
+    </div>
+    <div class="box-select">
+      <img src="images/illustrations/dog.png" alt="">
+      <p>3. Do you have pets? Do they <b>chew</b> plants?</p>
+      <select name="chew" id="chew" onChange="update()">
+        <option value="">select</option>
+        <option value="true">true</option>
+        <option value="false">false</option>
+      </select>
+    </div>
+  </section>
+  <section class="section-bottom">
+    <div class="title-section">
+      <img src="/images/illustrations/pick.png" alt="">
+      <h1>Our picks for your</h1>
+    </div>
+    <div class="box-plants" id="box-plants">
+      <div class="angry-grid" id="angry-grid">
+      </div>
+    </div>
+    <div class="back-top">
+      <div>
+        <img src="/images/icons/arrow-up.svg" alt="">
+        back to the top
+      </div>
+    </div>
+  </section>
+  <!-- Include the JavaScript file -->
+  <script type="text/javascript">
+    function update() {
+      var selectSunlight = document.getElementById('sunlight');
+      var selectWater = document.getElementById('water');
+      var selectChew = document.getElementById('chew');
+      var sunlight = selectSunlight.options[selectSunlight.selectedIndex].value;
+      var water = selectWater.options[selectWater.selectedIndex].value;
+      var chew = selectChew.options[selectChew.selectedIndex].value;
+      let dados = { sunlight, water, chew };
+      consultaApi(dados);
+    }
+
+    function consultaApi({ sunlight, water, chew }) {
+      console.log(sunlight, water, chew);
+      let url;
+      let html;
+      if (sunlight | water | chew !== '') {
+        url = `https://front-br-challenges.web.app/api/v2/green-thumb/?sun=${sunlight}&water=${water}&pets=${chew}`;
+        html = '';
+      }
+
+      fetch(url)
+        .then((resp) => resp.json())
+        .then(function (data) {
+          html = data.map(plant => {
+            console.log(plant.staff_favorite);
+            if (plant.staff_favorite === true) {
+              const html1 = `
+              <div class="item-${plant.id}" id="item-${plant.id}">
+                  <img class="img-plant" src=${plant.url} alt="">
+                    <div>${plant.name}</div>
+                    <div>
+                      <p>${plant.price}</p>
+                      <div>
+                        <img src="/images/icons/pet.svg" alt="">
+                        <img src="/images/icons/low-sun.svg" alt="">
+                        <img src="/images/icons/toxic.svg" alt="">
+                      </div>
+                  </div>
+                </div>
+              `
+
+              document.getElementById('angry-grid').insertAdjacentHTML("afterbegin", html1);
+            } else {
+              return `
+              <div class="item-${plant.id}" id="item-${plant.id}">
+               <img class="img-plant" src=${plant.url} alt="">
+                    <p>${plant.name}</p>
+                    <div>
+                      <p>${plant.price}</p>
+                      <img class="svg-img" src="/images/icons/pet.svg" alt="">
+                      <img class="svg-img" src="/images/icons/${plant.sun}-sun.svg" alt="">
+                      <img class="svg-img" src="/images/icons/toxic.svg" alt="">
+                  </div>
+                </div>
+              `
+            }
+          }).join("");
+          document.getElementById('angry-grid').insertAdjacentHTML("afterbegin", html);
+
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    };
+  </script>
+</body>
+
 </html>
